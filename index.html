@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Form Biodata</title>
+  <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    h1 {
+      text-align: center;
+      color: red;
+      font-style: italic;
+      text-decoration: underline;
+    }
+
+    .container {
+      width: 700px;
+      margin: 0 auto;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    label {
+      color: black;
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    input[type="text"],
+    input[type="date"] {
+      width: 100%;
+      padding: 6px;
+    }
+
+    .photo-box {
+      width: 120px;
+      height: 150px;
+      border: 1px solid black;
+      margin-bottom: 10px;
+      background-size: cover;
+      background-position: center;
+      background-color: #f0f0f0;
+    }
+
+    .radio-group,
+    .checkbox-group {
+      margin-left: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+    }
+
+    th, td {
+      border: 1px solid black;
+      padding: 6px;
+    }
+
+    th {
+      color: red;
+      text-decoration: underline;
+    }
+
+    .submit-btn {
+      display: block;
+      margin: 30px auto;
+      padding: 10px 25px;
+      background-color: #0b74d1;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #foto-input {
+      margin-bottom: 15px;
+    }
+
+    #data-output {
+      margin-top: 20px;
+      border: 1px solid black;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1><b><i>BIODATA</i></b></h1>
+
+  <div class="container">
+
+    <div class="photo-box" id="previewFoto"></div>
+    <input type="file" id="foto-input" accept="image/*">
+
+    <div class="form-group">
+      <label>Nama</label>
+      <input type="text" name="nama" id="nama">
+    </div>
+
+    <div class="form-group">
+      <label>Tanggal Lahir</label>
+      <input type="date" name="tanggal_lahir" id="tanggal_lahir">
+    </div>
+
+    <div class="form-group">
+      <label>Alamat</label>
+      <input type="text" name="alamat" id="alamat">
+    </div>
+
+    <div class="form-group">
+      <label>Jenis Kelamin</label>
+      <div class="radio-group">
+        <label><input type="radio" name="jk" value="Laki-laki" id="jk-laki-laki"> Laki-laki</label><br>
+        <label><input type="radio" name="jk" value="Perempuan" id="jk-perempuan"> Perempuan</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Hobi</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" name="hobi" value="Membaca" id="hobi-membaca"> Membaca</label><br>
+        <label><input type="checkbox" name="hobi" value="Menulis" id="hobi-menulis"> Menulis</label><br>
+        <label><input type="checkbox" name="hobi" value="Olahraga" id="hobi-olahraga"> Olahraga</label><br>
+        <label><input type="checkbox" name="hobi" value="Musik" id="hobi-musik"> Musik</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Riwayat Sekolah</label>
+      <input type="text" name="riwayat_sekolah" id="riwayat_sekolah">
+    </div>
+
+    <button class="submit-btn" id="submit-btn">Simpan</button>
+    <button class="submit-btn" id="download-word-btn">Download Word</button>
+  </div>
+
+  <script>
+    document.getElementById("foto-input").addEventListener("change", function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById("previewFoto").style.backgroundImage = `url('${e.target.result}')`;
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+  document.getElementById("download-word-btn").addEventListener("click", function () {
+  const fileInput = document.getElementById("foto-input");
+  const file = fileInput.files[0];
+
+  if (!file) {
+    alert("Silakan upload foto terlebih dahulu.");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const imageBase64 = e.target.result.split(',')[1]; 
+
+    const nama = document.getElementById("nama").value;
+    const tanggalLahir = document.getElementById("tanggal_lahir").value;
+    const alamat = document.getElementById("alamat").value;
+    const jk = document.querySelector('input[name="jk"]:checked') ? document.querySelector('input[name="jk"]:checked').value : '';
+    const hobi = [];
+    document.querySelectorAll('input[name="hobi"]:checked').forEach(function (checkbox) {
+      hobi.push(checkbox.value);
+    });
+    const riwayatSekolah = document.getElementById("riwayat_sekolah").value;
+
+    const { Document, Packer, Paragraph, TextRun, ImageRun } = window.docx;
+
+    const doc = new Document({
+      sections: [{
+        properties: {},
+        children: [
+          new Paragraph({
+            children: [new TextRun({ text: "BIODATA", bold: true, size: 32 })],
+            spacing: { after: 300 }
+            
+          }),
+          
+          new Paragraph(`Nama: ${nama}`),
+          new Paragraph(`Tanggal Lahir: ${tanggalLahir}`),
+          new Paragraph(`Alamat: ${alamat}`),
+          new Paragraph(`Jenis Kelamin: ${jk}`),
+          new Paragraph(`Hobi: ${hobi.join(', ')}`),
+          new Paragraph(`Riwayat Sekolah: ${riwayatSekolah}`),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "\nFoto:", break: 1 }),
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new ImageRun({
+                data: Uint8Array.from(atob(imageBase64), c => c.charCodeAt(0)),
+                transformation: {
+                  width: 120,
+                  height: 150
+                }
+              })
+            ]
+          })
+        ]
+      }]
+    });
+
+    Packer.toBlob(doc).then(blob => {
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "biodata_dengan_foto.docx";
+      link.click();
+    });
+  };
+
+  reader.readAsDataURL(file);
+});
+
+</script>
+</body>
+</html>
